@@ -298,25 +298,21 @@ get_section_vma_by_name (char *name, size_t namesz,
  */
 
 EFI_STATUS
-generate_hash(char *data, unsigned int datasize_in,
+generate_hash(char *data, const unsigned int datasize,
 	      PE_COFF_LOADER_IMAGE_CONTEXT *context, UINT8 *sha256hash,
 	      UINT8 *sha1hash)
 {
 	unsigned int sha256ctxsize, sha1ctxsize;
-	unsigned int size = datasize_in;
 	void *sha256ctx = NULL, *sha1ctx = NULL;
 	char *hashbase;
 	unsigned int hashsize;
 	unsigned int SumOfBytesHashed, SumOfSectionBytes;
 	unsigned int index, pos;
-	unsigned int datasize;
 	EFI_IMAGE_SECTION_HEADER *Section;
 	EFI_IMAGE_SECTION_HEADER *SectionHeader = NULL;
 	EFI_STATUS efi_status = EFI_SUCCESS;
 	EFI_IMAGE_DOS_HEADER *DosHdr = (void *)data;
 	unsigned int PEHdr_offset = 0;
-
-	size = datasize = datasize_in;
 
 	if (datasize <= sizeof (*DosHdr) ||
 	    DosHdr->e_magic != EFI_IMAGE_DOS_SIGNATURE) {
@@ -491,7 +487,8 @@ generate_hash(char *data, unsigned int datasize_in,
 			continue;
 		}
 
-		hashbase  = ImageAddress(data, size, Section->PointerToRawData);
+		hashbase  = ImageAddress(data, datasize,
+					 Section->PointerToRawData);
 		if (!hashbase) {
 			perror(L"Malformed section header\n");
 			efi_status = EFI_INVALID_PARAMETER;
